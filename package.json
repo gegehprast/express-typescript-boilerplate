@@ -7,8 +7,9 @@
     "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
     "build": "tsc",
     "watch": "npm run build -- -w",
-    "start:nodemon": "nodemon . --ignore 'storage/*'",
-    "start": "run-p watch start:nodemon",
+    "nodemon": "nodemon . --ignore 'storage/*'",
+    "dev": "run-p watch nodemon",
+    "prod": "npm run build && node .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
