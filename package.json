@@ -4,7 +4,6 @@
   "description": "",
   "main": "dist/index",
   "scripts": {
-    "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
     "build": "tsc",
     "watch": "npm run build -- -w",
     "nodemon": "nodemon .",
