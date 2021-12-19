@@ -1,15 +1,19 @@
 {
   "name": "express-typescript-boilerplate",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "",
-  "main": "dist/index",
+  "main": "build/index",
   "scripts": {
-    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-ts": "tsc",
+    "build": "npm run build-ts",
     "watch": "npm run build -- -w",
     "nodemon": "nodemon .",
-    "dev": "npm run build && run-p watch nodemon",
-    "prod": "npm run build && node .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "predev": "npm run build",
+    "dev": "nodemon --watch ./src/**/*.ts --exec ts-node ./src/index.ts",
+    "preprod": "npm run build",
+    "prod": "node . --unhandled-rejections=warn",
+    "start": "npm run prod"
   },
   "author": "",
   "license": "ISC",
@@ -20,7 +24,9 @@
     "@typescript-eslint/parser": "^5.1.0",
     "eslint": "^8.0.1",
     "npm-run-all": "^4.1.5",
-    "typescript": "^4.4.4"
+    "typescript": "^4.4.4",
+    "nodemon": "^2.0.13",
+    "ts-node": "^10.3.0"
   },
   "dependencies": {
     "dotenv": "^8.2.0",
