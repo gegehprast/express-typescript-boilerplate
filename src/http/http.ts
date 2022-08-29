@@ -34,7 +34,7 @@ const init = async () => {
     app.use(setHeaders)
 
     // init routes
-    app.use('/api', await routes())
+    app.use('/', await routes())
 
     // listen
     server.listen(process.env.APP_PORT || 3000, () =>
