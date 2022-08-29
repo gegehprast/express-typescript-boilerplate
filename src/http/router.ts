@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import express from 'express'
+import { RouteHandler } from './Types'
 
 const ROUTER = express.Router()
 const ROUTE_PATH = './routes'
@@ -12,7 +13,7 @@ const routes = async () => {
         .filter((file) => file.endsWith('.js') || file.endsWith('.ts'))
 
     for (const file of files) {
-        ;(await import(`${ROUTE_PATH}/${file}`)).default(ROUTER)
+        ;((await import(`${ROUTE_PATH}/${file}`)).default as RouteHandler)(ROUTER)
     }
 
     return ROUTER
