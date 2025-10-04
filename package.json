@@ -1,7 +1,7 @@
 {
   "name": "express-typescript-boilerplate",
   "version": "2.0.0-alpha.0",
-  "description": "",
+  "description": "Spin up an Express server in TypeScript in seconds.",
   "main": "build/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
