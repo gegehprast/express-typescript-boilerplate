@@ -2,15 +2,15 @@
   "name": "express-typescript-boilerplate",
   "version": "1.2.10",
   "description": "",
-  "main": "build/index",
+  "main": "build/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "watch": "npm run build -- -w",
-    "dev": "set APP_ENV=development && tsx watch ./src/index.ts --unhandled-rejections=warn",
-    "preprod": "npm run build",
-    "prod": "set APP_ENV=production && node . --unhandled-rejections=warn",
-    "start": "npm run prod"
+    "clean": "rm -rf build",
+    "dev": "set APP_ENV=development && tsx watch ./src/index.ts",
+    "preprod": "pnpm run build",
+    "prod": "set APP_ENV=production && node ./build/index.js",
+    "start": "pnpm run prod"
   },
   "author": "",
   "license": "ISC",
