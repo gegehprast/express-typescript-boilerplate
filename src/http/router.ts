@@ -14,19 +14,26 @@ const ROUTE_PATH = './routes'
 const ROUTE_DIR = path.join(__dirname, ROUTE_PATH)
 
 const routes = async () => {
-    const files = getAllFiles(ROUTE_DIR).filter((file) => file.endsWith('.js') || file.endsWith('.ts'))
+    const files = getAllFiles(ROUTE_DIR).filter(
+        (file) => file.endsWith('.js') || file.endsWith('.ts'),
+    )
     const correctPaths: PathObject[] = []
 
     for (const file of files) {
         const handler = (await import(file)).default as RequestHandler
-        const path = file.replace(ROUTE_DIR, '').replaceAll('\\', '/').replace('.ts', '').replace('.js', '')
+        const path = file
+            .replace(ROUTE_DIR, '')
+            .replaceAll('\\', '/')
+            .replace('.ts', '')
+            .replace('.js', '')
         const segments = path.split('/')
         let isDynamic = false
 
         segments.forEach((segment, index) => {
             if (segment.startsWith('[') && segment.endsWith(']')) {
                 isDynamic = true
-                segments[index] = `:${segment.replace('[', '').replace(']', '')}`
+                segments[index] =
+                    `:${segment.replace('[', '').replace(']', '')}`
             }
         })
 

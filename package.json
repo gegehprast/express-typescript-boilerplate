@@ -8,9 +8,9 @@
     "build": "tsc",
     "clean": "rm -rf build",
     "dev": "set APP_ENV=development && tsx watch ./src/index.ts",
-    "preprod": "pnpm run build",
-    "prod": "set APP_ENV=production && node ./build/index.js",
-    "start": "pnpm run prod"
+    "prestart": "tsc",
+    "start": "set APP_ENV=production && node ./build/index.js",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "author": "",
   "license": "MIT",
@@ -19,6 +19,7 @@
     "@types/node": "^24.6.2",
     "eslint": "^9.37.0",
     "nodemon": "^3.1.10",
+    "prettier": "^3.6.2",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   },

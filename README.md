@@ -1,10 +1,15 @@
 ### A super simple boilerplate of an express app with typescript.
 
 #### Developing
-`npm run dev`
+
+`pnpm run dev`
 
 #### Build
-`npm run build`
+
+`pnpm run build`
 
 #### Production
-`npm start`
+
+`pnpm start`
+
+You can use npm or yarn too, just change the commands accordingly.

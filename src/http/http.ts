@@ -15,7 +15,7 @@ const init = async () => {
     app.use(
         express.urlencoded({
             extended: true,
-        })
+        }),
     )
 
     // use static public url
@@ -41,8 +41,8 @@ const init = async () => {
         console.log(
             `[HTTP] Server ready and running at port: ${
                 process.env.APP_PORT || 3000
-            }`
-        )
+            }`,
+        ),
     )
 
     return { server, app }

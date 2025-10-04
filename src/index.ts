@@ -8,7 +8,7 @@ process.on('unhandledRejection', (reason, promise) => {
     console.error(
         '[APP] Unhandled Rejection at:',
         (reason as any).stack || reason,
-        promise
+        promise,
     )
 })
 

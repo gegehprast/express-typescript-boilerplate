@@ -12,7 +12,7 @@ export const exceptionHandler = (exception: unknown, res: Response) => {
         if (exception instanceof HttpException) {
             code = exception.code
         }
-        
+
         message = message || exception.message
         stack = exception.stack
     }
