@@ -2,29 +2,36 @@
   "name": "express-typescript-boilerplate",
   "version": "2.0.0-alpha.0",
   "description": "Spin up an Express server in TypeScript in seconds.",
-  "main": "build/index.js",
+  "type": "module",
+  "main": "build/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
+    "lint": "tsc",
+    "build": "tsdown",
     "clean": "rm -rf build",
-    "dev": "set APP_ENV=development && tsx watch ./src/index.ts",
-    "prestart": "tsc",
-    "start": "set APP_ENV=production && node ./build/index.js",
+    "dev": "node --import=tsx --watch ./src/main.ts",
+    "prestart": "tsdown",
+    "start": "NODE_ENV=production node ./build/main.js",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
-  "author": "",
+  "author": "Gegeh Prast",
+  "homepage": "https://github.com/gegehprast/express-typescript-boilerplate",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gegehprast/express-typescript-boilerplate.git"
+  },
   "license": "MIT",
   "devDependencies": {
     "@types/express": "^5.0.3",
-    "@types/node": "^24.6.2",
-    "eslint": "^9.37.0",
-    "nodemon": "^3.1.10",
+    "@types/node": "^24.7.1",
     "prettier": "^3.6.2",
+    "tsdown": "^0.15.6",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   },
   "dependencies": {
     "dotenv": "^17.2.3",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "socket.io": "^4.8.1"
   }
 }

@@ -1,24 +1,19 @@
 {
+  "display": "Node LTS (24)",
+  "_version": "24.0.0",
   "compilerOptions": {
-    "target": "ESNext",
-    "allowJs": true,
-    "skipLibCheck": true,
+    "lib": ["ES2023"],
+    "module": "NodeNext",
+    "target": "ES2023",
     "strict": true,
-    "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "paths": {
-      "*": [
-        "./node_modules/*"
-      ]
-    },
-    "resolveJsonModule": true,
-    "sourceMap": true,
+    "skipLibCheck": true,
     "outDir": "build",
-    "isolatedModules": true,
-    "incremental": true
+    "noUncheckedIndexedAccess": true,
+    "resolveJsonModule": true,
+    "isolatedDeclarations": true,
+    "declaration": true,
+    "noEmit": true
   },
-  "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules"],
+  "include": ["src/**/*.ts"]
 }
