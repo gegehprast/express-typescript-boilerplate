@@ -5,7 +5,7 @@ A simple service-based Express TypeScript application.
 ## Features
 
 - 🏗️ **Service-based architecture** - Easy to extend with new services
-- 🔌 **WebSocket support** - Real-time communication with Socket.IO
+- 🔌 **WebSocket support** - Real-time communication with Socket.IO (WIP)
 - 📝 **TypeScript** - Type safety first
 - ⚙️ **Error handling** - Built-in error handling
 - 🔄 **Graceful shutdown** - Proper service lifecycle management
