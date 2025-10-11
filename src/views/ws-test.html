@@ -165,6 +165,17 @@
                 </div>
             </div>
             
+            <!-- Room Information -->
+            <div class="control-section">
+                <h4>🏠 Room Information</h4>
+                <input type="text" id="roomQuery" placeholder="Room name to query..." disabled>
+                <div>
+                    <button onclick="getRooms()" id="getRoomsBtn" disabled class="secondary">Get All Rooms</button>
+                    <button onclick="getRoomUsers()" id="getRoomUsersBtn" disabled class="secondary">Get Room Users</button>
+                    <button onclick="getRoomsInfo()" id="getRoomsInfoBtn" disabled class="secondary">Get Rooms Info</button>
+                </div>
+            </div>
+            
             <!-- Custom Events -->
             <div class="control-section">
                 <h4>⚡ Custom Events</h4>
@@ -197,6 +208,9 @@
                 <li><strong>sum</strong> - Calculate sum of two numbers (returns result)</li>
                 <li><strong>reverse_text</strong> - Reverse a text string (example handler)</li>
                 <li><strong>random_number</strong> - Generate random number in range (example handler)</li>
+                <li><strong>get_rooms</strong> - Get list of all active rooms</li>
+                <li><strong>get_room_users</strong> - Get list of users in a specific room</li>
+                <li><strong>get_rooms_info</strong> - Get detailed information about all rooms</li>
             </ul>
         </div>
     </div>
@@ -216,6 +230,7 @@
         const roomInput = document.getElementById('roomInput');
         const numberA = document.getElementById('numberA');
         const numberB = document.getElementById('numberB');
+        const roomQuery = document.getElementById('roomQuery');
         const customEvent = document.getElementById('customEvent');
         const customData = document.getElementById('customData');
         
@@ -230,6 +245,9 @@
         const serverInfoBtn = document.getElementById('serverInfoBtn');
         const clientInfoBtn = document.getElementById('clientInfoBtn');
         const sumBtn = document.getElementById('sumBtn');
+        const getRoomsBtn = document.getElementById('getRoomsBtn');
+        const getRoomUsersBtn = document.getElementById('getRoomUsersBtn');
+        const getRoomsInfoBtn = document.getElementById('getRoomsInfoBtn');
         const customBtn = document.getElementById('customBtn');
 
         function addMessage(message, type = 'info') {
@@ -250,8 +268,8 @@
         }
 
         function updateStatus(connected) {
-            const inputs = [messageInput, roomInput, numberA, numberB, customEvent, customData];
-            const buttons = [sendBtn, broadcastBtn, joinRoomBtn, leaveRoomBtn, pingBtn, serverInfoBtn, clientInfoBtn, sumBtn, customBtn];
+            const inputs = [messageInput, roomInput, numberA, numberB, roomQuery, customEvent, customData];
+            const buttons = [sendBtn, broadcastBtn, joinRoomBtn, leaveRoomBtn, pingBtn, serverInfoBtn, clientInfoBtn, sumBtn, getRoomsBtn, getRoomUsersBtn, getRoomsInfoBtn, customBtn];
             
             if (connected) {
                 statusEl.textContent = `Connected (ID: ${socket.id})`;
@@ -378,6 +396,35 @@
                 addMessage(`Random Number Error: ${data.message}`, 'error');
             });
 
+            // Room info events
+            socket.on('rooms_list', (data) => {
+                const roomsList = data.rooms.length > 0 ? data.rooms.join(', ') : 'No active rooms';
+                addMessage(`Active Rooms (${data.count}): ${roomsList}`, 'received');
+            });
+
+            socket.on('room_users', (data) => {
+                if (data.exists) {
+                    const usersList = data.users.length > 0 ? data.users.join(', ') : 'No users';
+                    addMessage(`Room "${data.room}" Users (${data.count}): ${usersList}`, 'received');
+                } else {
+                    addMessage(`Room "${data.room}" does not exist`, 'received');
+                }
+            });
+
+            socket.on('room_users_error', (data) => {
+                addMessage(`Room Users Error: ${data.message}`, 'error');
+            });
+
+            socket.on('rooms_info', (data) => {
+                const summary = `Total Rooms: ${data.totalRooms}, Total Users: ${data.totalUsers}`;
+                addMessage(`Rooms Info - ${summary}`, 'received');
+                
+                data.rooms.forEach(room => {
+                    const usersList = room.users.length > 0 ? room.users.join(', ') : 'No users';
+                    addMessage(`  • "${room.name}" (${room.userCount} users): ${usersList}`, 'received');
+                });
+            });
+
             // Error handling
             socket.on('error', (data) => {
                 addMessage(`Error: ${data.message || JSON.stringify(data)}`, 'error');
@@ -425,6 +472,29 @@
 
             addMessage(`Leaving room: "${room}"`, 'sent');
             socket.emit('leave_room', { room });
+        }
+
+        // Room info functions
+        function getRooms() {
+            if (!socket || !socket.connected) return;
+
+            addMessage('Requesting list of all rooms...', 'sent');
+            socket.emit('get_rooms');
+        }
+
+        function getRoomUsers() {
+            const room = roomQuery.value.trim();
+            if (!room || !socket || !socket.connected) return;
+
+            addMessage(`Requesting users in room: "${room}"`, 'sent');
+            socket.emit('get_room_users', { room });
+        }
+
+        function getRoomsInfo() {
+            if (!socket || !socket.connected) return;
+
+            addMessage('Requesting detailed rooms information...', 'sent');
+            socket.emit('get_rooms_info');
         }
 
         // Utility functions
@@ -504,6 +574,10 @@
 
         numberB.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') sendSum();
+        });
+
+        roomQuery.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') getRoomUsers();
         });
 
         // Initial status

@@ -10,6 +10,7 @@ import {
 } from './handlers/message-handlers.js'
 import { clientInfoHandler, pingHandler, serverInfoHandler } from './handlers/utility-handlers.js'
 import { defaultConnectionHandler } from './handlers/connection-handlers.js'
+import { getRoomsHandler, getRoomUsersHandler, getRoomsInfoHandler } from './handlers/room-info-handlers.js'
 
 const registerEvents = (eventRegistry: EventRegistry): void => {
     // Register connection handlers. REQUIRED!
@@ -31,6 +32,9 @@ const registerEvents = (eventRegistry: EventRegistry): void => {
 
     // Register example handlers
     eventRegistry.registerMultiple([reverseTextHandler, randomNumberHandler])
+
+    // Register room info handlers
+    eventRegistry.registerMultiple([getRoomsHandler, getRoomUsersHandler, getRoomsInfoHandler])
 }
 
 export default registerEvents

@@ -105,4 +105,66 @@ export class WebSocketService implements IService {
     ): void {
         this.eventRegistry.register({ event, handler })
     }
+
+    getRoomList(): string[] {
+        if (!this.io) return []
+        
+        const rooms: string[] = []
+        const adapter = this.io.sockets.adapter
+        
+        for (const [roomName] of adapter.rooms) {
+            // Filter out socket IDs (which are also stored as rooms)
+            // Socket IDs are typically UUIDs, so we skip them if they look like socket IDs
+            if (!roomName.match(/^[a-zA-Z0-9_-]{20,}$/)) {
+                rooms.push(roomName)
+            }
+        }
+        
+        return rooms
+    }
+
+    getUsersInRoom(roomName: string): string[] {
+        if (!this.io) return []
+        
+        const room = this.io.sockets.adapter.rooms.get(roomName)
+        if (!room) return []
+        
+        return Array.from(room)
+    }
+
+    getRoomInfo(roomName: string): { name: string; userCount: number; users: string[] } | null {
+        if (!this.io) return null
+        
+        const room = this.io.sockets.adapter.rooms.get(roomName)
+        if (!room) return null
+        
+        const users = Array.from(room)
+        
+        return {
+            name: roomName,
+            userCount: users.length,
+            users: users
+        }
+    }
+
+    getAllRoomsInfo(): Array<{ name: string; userCount: number; users: string[] }> {
+        if (!this.io) return []
+        
+        const roomsInfo: Array<{ name: string; userCount: number; users: string[] }> = []
+        const adapter = this.io.sockets.adapter
+        
+        for (const [roomName, room] of adapter.rooms) {
+            // Filter out socket IDs (which are also stored as rooms)
+            if (!roomName.match(/^[a-zA-Z0-9_-]{20,}$/)) {
+                const users = Array.from(room)
+                roomsInfo.push({
+                    name: roomName,
+                    userCount: users.length,
+                    users: users
+                })
+            }
+        }
+        
+        return roomsInfo
+    }
 }
