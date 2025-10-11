@@ -1,6 +1,8 @@
 import { Server as SocketIOServer } from 'socket.io'
 import { Server as HttpServer } from 'http'
 import { IService } from '../../types/service.js'
+import { EventRegistry } from './EventRegistry.js'
+import registerEvents from './event-registration.js'
 
 export interface WebSocketServiceConfig {
     cors?: {
@@ -15,6 +17,7 @@ export class WebSocketService implements IService {
     private httpServer: HttpServer | null = null
     private getHttpServer: () => HttpServer | null
     private config: WebSocketServiceConfig
+    private eventRegistry: EventRegistry
 
     constructor(getHttpServer: () => HttpServer | null, config: WebSocketServiceConfig = {}) {
         this.getHttpServer = getHttpServer
@@ -25,6 +28,9 @@ export class WebSocketService implements IService {
                 ...config.cors,
             },
         }
+
+        this.eventRegistry = new EventRegistry()
+        registerEvents(this.eventRegistry)
     }
 
     async start(): Promise<void> {
@@ -68,40 +74,35 @@ export class WebSocketService implements IService {
     private setupEventHandlers(): void {
         if (!this.io) return
 
-        this.io.on('connection', (socket) => {
-            console.log(`[WebSocket] Client connected: ${socket.id}`)
+        this.io.on('connection', async (socket) => {
+            await this.eventRegistry.handleConnection(socket)
 
-            socket.on('disconnect', () => {
-                console.log(`[WebSocket] Client disconnected: ${socket.id}`)
+            socket.on('disconnect', async (reason) => {
+                await this.eventRegistry.handleDisconnection(socket, reason)
             })
 
-            socket.on('message', (data) => {
-                console.log(`[WebSocket] Message from ${socket.id}:`, data)
-                // Echo the message back
-                socket.emit('message', {
-                    echo: data,
-                    timestamp: new Date().toISOString(),
+            const handlers = this.eventRegistry.getHandlers()
+
+            for (const [event, handler] of handlers) {
+                socket.on(event, async (data) => {
+                    await this.eventRegistry.handleEvent(socket, event, data)
                 })
-            })
-
-            // Ping/Pong for connection health
-            socket.on('ping', () => {
-                socket.emit('pong', { timestamp: new Date().toISOString() })
-            })
-
-            // Broadcast message to all clients
-            socket.on('broadcast', (data) => {
-                console.log(`[WebSocket] Broadcasting message from ${socket.id}:`, data)
-                socket.broadcast.emit('broadcast', {
-                    from: socket.id,
-                    message: data,
-                    timestamp: new Date().toISOString(),
-                })
-            })
+            }
         })
     }
 
     getIO(): SocketIOServer | null {
         return this.io
+    }
+
+    getEventRegistry(): EventRegistry {
+        return this.eventRegistry
+    }
+
+    registerEventHandler(
+        event: string,
+        handler: (socket: any, data: any) => void | Promise<void>,
+    ): void {
+        this.eventRegistry.register({ event, handler })
     }
 }

@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket Test</title>
+    <title>WebSocket Test - Modular Event System</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
             background-color: #f5f5f5;
@@ -17,6 +17,7 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
         }
         .status {
             padding: 10px;
@@ -42,22 +43,41 @@
             background: #f9f9f9;
             max-height: 300px;
             overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .control-section {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        .control-section h4 {
+            margin-top: 0;
+            color: #495057;
         }
         input[type="text"] {
-            width: 70%;
+            width: calc(100% - 16px);
             padding: 8px;
-            margin: 5px;
+            margin: 5px 0;
             border: 1px solid #ddd;
             border-radius: 4px;
         }
         button {
             padding: 8px 16px;
-            margin: 5px;
+            margin: 3px;
             background: #007bff;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 12px;
         }
         button:hover {
             background: #0056b3;
@@ -66,67 +86,188 @@
             background: #6c757d;
             cursor: not-allowed;
         }
+        button.secondary {
+            background: #6c757d;
+        }
+        button.secondary:hover {
+            background: #545b62;
+        }
+        button.success {
+            background: #28a745;
+        }
+        button.success:hover {
+            background: #218838;
+        }
+        button.warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        button.warning:hover {
+            background: #e0a800;
+        }
+        .latency {
+            font-weight: bold;
+            color: #007bff;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>WebSocket Test Page</h1>
+        <h1>WebSocket Test - Modular Event System</h1>
         <div id="status" class="status disconnected">Disconnected</div>
         
-        <div>
-            <input type="text" id="messageInput" placeholder="Enter message..." disabled>
-            <button onclick="sendMessage()" id="sendBtn" disabled>Send Message</button>
+        <!-- Connection Controls -->
+        <div style="margin: 20px 0;">
             <button onclick="connect()" id="connectBtn">Connect</button>
             <button onclick="disconnect()" id="disconnectBtn" disabled>Disconnect</button>
+            <span id="latency" class="latency"></span>
         </div>
         
-        <h3>Messages:</h3>
-        <div id="messages" class="message-box"></div>
+        <!-- Event Testing Controls -->
+        <div class="controls-grid">
+            <!-- Message Events -->
+            <div class="control-section">
+                <h4>💬 Message Events</h4>
+                <input type="text" id="messageInput" placeholder="Enter message..." disabled>
+                <div>
+                    <button onclick="sendMessage()" id="sendBtn" disabled>Send Echo</button>
+                    <button onclick="broadcastMessage()" id="broadcastBtn" disabled class="warning">Broadcast</button>
+                </div>
+            </div>
+            
+            <!-- Room Events -->
+            <div class="control-section">
+                <h4>🏠 Room Management</h4>
+                <input type="text" id="roomInput" placeholder="Room name..." disabled>
+                <div>
+                    <button onclick="joinRoom()" id="joinRoomBtn" disabled class="success">Join Room</button>
+                    <button onclick="leaveRoom()" id="leaveRoomBtn" disabled class="secondary">Leave Room</button>
+                </div>
+            </div>
+            
+            <!-- Utility Events -->
+            <div class="control-section">
+                <h4>🔧 Utilities</h4>
+                <div>
+                    <button onclick="sendPing()" id="pingBtn" disabled>Ping Server</button>
+                    <button onclick="getServerInfo()" id="serverInfoBtn" disabled class="secondary">Server Info</button>
+                    <button onclick="getClientInfo()" id="clientInfoBtn" disabled class="secondary">Client Info</button>
+                </div>
+            </div>
+            
+            <!-- Math Operations -->
+            <div class="control-section">
+                <h4>🧮 Math Operations</h4>
+                <input type="number" id="numberA" placeholder="Number A" disabled value="5">
+                <input type="number" id="numberB" placeholder="Number B" disabled value="3">
+                <div>
+                    <button onclick="sendSum()" id="sumBtn" disabled class="success">Calculate Sum</button>
+                </div>
+            </div>
+            
+            <!-- Custom Events -->
+            <div class="control-section">
+                <h4>⚡ Custom Events</h4>
+                <input type="text" id="customEvent" placeholder="Event name..." disabled>
+                <input type="text" id="customData" placeholder="JSON data..." disabled>
+                <div>
+                    <button onclick="sendCustomEvent()" id="customBtn" disabled class="warning">Send Custom</button>
+                </div>
+            </div>
+        </div>
         
-        <div style="margin-top: 20px;">
-            <small>
-                <strong>Instructions:</strong><br>
-                1. Click "Connect" to establish WebSocket connection<br>
-                2. Type a message and click "Send Message"<br>
-                3. The server will echo your message back<br>
-                4. All connection events are logged below
-            </small>
+        <!-- Messages Log -->
+        <div class="container">
+            <h3>📋 Event Log</h3>
+            <div id="messages" class="message-box"></div>
+            <button onclick="clearMessages()" class="secondary">Clear Log</button>
+        </div>
+        
+        <!-- Instructions -->
+        <div class="container">
+            <h4>📖 Available Events</h4>
+            <ul style="font-size: 14px; color: #666;">
+                <li><strong>message</strong> - Echo message back to sender</li>
+                <li><strong>broadcast</strong> - Send message to all other connected clients</li>
+                <li><strong>join_room</strong> - Join a named room for group messaging</li>
+                <li><strong>leave_room</strong> - Leave a previously joined room</li>
+                <li><strong>ping</strong> - Health check with latency measurement</li>
+                <li><strong>server_info</strong> - Get server information and stats</li>
+                <li><strong>client_info</strong> - Get your client connection details</li>
+                <li><strong>sum</strong> - Calculate sum of two numbers (returns result)</li>
+                <li><strong>reverse_text</strong> - Reverse a text string (example handler)</li>
+                <li><strong>random_number</strong> - Generate random number in range (example handler)</li>
+            </ul>
         </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         let socket = null;
+        let pingStartTime = null;
+        
+        // DOM elements
         const statusEl = document.getElementById('status');
         const messagesEl = document.getElementById('messages');
+        const latencyEl = document.getElementById('latency');
+        
+        // Input elements
         const messageInput = document.getElementById('messageInput');
-        const sendBtn = document.getElementById('sendBtn');
+        const roomInput = document.getElementById('roomInput');
+        const numberA = document.getElementById('numberA');
+        const numberB = document.getElementById('numberB');
+        const customEvent = document.getElementById('customEvent');
+        const customData = document.getElementById('customData');
+        
+        // Button elements
         const connectBtn = document.getElementById('connectBtn');
         const disconnectBtn = document.getElementById('disconnectBtn');
+        const sendBtn = document.getElementById('sendBtn');
+        const broadcastBtn = document.getElementById('broadcastBtn');
+        const joinRoomBtn = document.getElementById('joinRoomBtn');
+        const leaveRoomBtn = document.getElementById('leaveRoomBtn');
+        const pingBtn = document.getElementById('pingBtn');
+        const serverInfoBtn = document.getElementById('serverInfoBtn');
+        const clientInfoBtn = document.getElementById('clientInfoBtn');
+        const sumBtn = document.getElementById('sumBtn');
+        const customBtn = document.getElementById('customBtn');
 
         function addMessage(message, type = 'info') {
             const timestamp = new Date().toLocaleTimeString();
             const messageEl = document.createElement('div');
-            messageEl.innerHTML = `<span style="color: #666;">[${timestamp}]</span> <strong>${type}:</strong> ${message}`;
+            const color = {
+                'system': '#28a745',
+                'sent': '#007bff', 
+                'received': '#6f42c1',
+                'error': '#dc3545',
+                'broadcast': '#fd7e14',
+                'room': '#20c997'
+            }[type] || '#666';
+            
+            messageEl.innerHTML = `<span style="color: #999;">[${timestamp}]</span> <span style="color: ${color}; font-weight: bold;">${type.toUpperCase()}:</span> ${message}`;
             messagesEl.appendChild(messageEl);
             messagesEl.scrollTop = messagesEl.scrollHeight;
         }
 
         function updateStatus(connected) {
+            const inputs = [messageInput, roomInput, numberA, numberB, customEvent, customData];
+            const buttons = [sendBtn, broadcastBtn, joinRoomBtn, leaveRoomBtn, pingBtn, serverInfoBtn, clientInfoBtn, sumBtn, customBtn];
+            
             if (connected) {
-                statusEl.textContent = 'Connected';
+                statusEl.textContent = `Connected (ID: ${socket.id})`;
                 statusEl.className = 'status connected';
-                messageInput.disabled = false;
-                sendBtn.disabled = false;
                 connectBtn.disabled = true;
                 disconnectBtn.disabled = false;
+                inputs.forEach(input => input.disabled = false);
+                buttons.forEach(btn => btn.disabled = false);
             } else {
                 statusEl.textContent = 'Disconnected';
                 statusEl.className = 'status disconnected';
-                messageInput.disabled = true;
-                sendBtn.disabled = true;
                 connectBtn.disabled = false;
                 disconnectBtn.disabled = true;
+                inputs.forEach(input => input.disabled = true);
+                buttons.forEach(btn => btn.disabled = true);
+                latencyEl.textContent = '';
             }
         }
 
@@ -136,6 +277,7 @@
             addMessage('Attempting to connect...', 'system');
             socket = io();
 
+            // Connection events
             socket.on('connect', () => {
                 addMessage(`Connected with ID: ${socket.id}`, 'system');
                 updateStatus(true);
@@ -146,13 +288,99 @@
                 updateStatus(false);
             });
 
-            socket.on('message', (data) => {
-                addMessage(`Server response: ${JSON.stringify(data)}`, 'received');
-            });
-
             socket.on('connect_error', (error) => {
                 addMessage(`Connection error: ${error.message}`, 'error');
                 updateStatus(false);
+            });
+
+            // Welcome message from connection handler
+            socket.on('connected', (data) => {
+                addMessage(`Server: ${data.message}`, 'system');
+            });
+
+            // User connection notifications
+            socket.on('user_connected', (data) => {
+                addMessage(`User ${data.userId} connected`, 'system');
+            });
+
+            socket.on('user_disconnected', (data) => {
+                addMessage(`User ${data.userId} disconnected (${data.reason})`, 'system');
+            });
+
+            // Message events
+            socket.on('message', (data) => {
+                addMessage(`Echo: ${JSON.stringify(data)}`, 'received');
+            });
+
+            socket.on('broadcast', (data) => {
+                addMessage(`Broadcast from ${data.from}: ${data.message}`, 'broadcast');
+            });
+
+            socket.on('broadcast_sent', (data) => {
+                addMessage(`Broadcast confirmed: ${data.message}`, 'system');
+            });
+
+            // Room events
+            socket.on('room_joined', (data) => {
+                addMessage(`Joined room "${data.room}": ${data.message}`, 'room');
+            });
+
+            socket.on('room_left', (data) => {
+                addMessage(`Left room "${data.room}": ${data.message}`, 'room');
+            });
+
+            socket.on('user_joined', (data) => {
+                addMessage(`User ${data.userId} joined room "${data.room}"`, 'room');
+            });
+
+            socket.on('user_left', (data) => {
+                addMessage(`User ${data.userId} left room "${data.room}"`, 'room');
+            });
+
+            // Utility events
+            socket.on('pong', (data) => {
+                const latency = pingStartTime ? Date.now() - pingStartTime : 0;
+                latencyEl.textContent = `Latency: ${latency}ms`;
+                addMessage(`Pong received - Latency: ${latency}ms`, 'received');
+                pingStartTime = null;
+            });
+
+            socket.on('server_info', (data) => {
+                addMessage(`Server Info: ${JSON.stringify(data, null, 2)}`, 'received');
+            });
+
+            socket.on('client_info', (data) => {
+                addMessage(`Client Info: ${JSON.stringify(data, null, 2)}`, 'received');
+            });
+
+            // Math operation events
+            socket.on('sum_result', (data) => {
+                addMessage(`Sum Result: ${data.a} + ${data.b} = ${data.result}`, 'received');
+            });
+
+            socket.on('sum_error', (data) => {
+                addMessage(`Sum Error: ${data.message}`, 'error');
+            });
+
+            socket.on('reverse_text_result', (data) => {
+                addMessage(`Reversed Text: "${data.original}" -> "${data.reversed}"`, 'received');
+            });
+
+            socket.on('reverse_text_error', (data) => {
+                addMessage(`Reverse Text Error: ${data.message}`, 'error');
+            });
+
+            socket.on('number_generated', (data) => {
+                addMessage(`Random Number: ${data.result} (Range: ${data.min}-${data.max})`, 'received');
+            });
+
+            socket.on('random_number_error', (data) => {
+                addMessage(`Random Number Error: ${data.message}`, 'error');
+            });
+
+            // Error handling
+            socket.on('error', (data) => {
+                addMessage(`Error: ${data.message || JSON.stringify(data)}`, 'error');
             });
         }
 
@@ -163,25 +391,124 @@
             }
         }
 
+        // Message functions
         function sendMessage() {
             const message = messageInput.value.trim();
             if (!message || !socket || !socket.connected) return;
 
-            addMessage(`Sent: ${message}`, 'sent');
+            addMessage(`Sending message: "${message}"`, 'sent');
             socket.emit('message', message);
             messageInput.value = '';
         }
 
-        // Allow sending message with Enter key
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendMessage();
+        function broadcastMessage() {
+            const message = messageInput.value.trim();
+            if (!message || !socket || !socket.connected) return;
+
+            addMessage(`Broadcasting: "${message}"`, 'sent');
+            socket.emit('broadcast', message);
+            messageInput.value = '';
+        }
+
+        // Room functions
+        function joinRoom() {
+            const room = roomInput.value.trim();
+            if (!room || !socket || !socket.connected) return;
+
+            addMessage(`Joining room: "${room}"`, 'sent');
+            socket.emit('join_room', { room });
+        }
+
+        function leaveRoom() {
+            const room = roomInput.value.trim();
+            if (!room || !socket || !socket.connected) return;
+
+            addMessage(`Leaving room: "${room}"`, 'sent');
+            socket.emit('leave_room', { room });
+        }
+
+        // Utility functions
+        function sendPing() {
+            if (!socket || !socket.connected) return;
+
+            pingStartTime = Date.now();
+            addMessage('Sending ping...', 'sent');
+            socket.emit('ping', { timestamp: pingStartTime });
+        }
+
+        function getServerInfo() {
+            if (!socket || !socket.connected) return;
+
+            addMessage('Requesting server info...', 'sent');
+            socket.emit('server_info');
+        }
+
+        function getClientInfo() {
+            if (!socket || !socket.connected) return;
+
+            addMessage('Requesting client info...', 'sent');
+            socket.emit('client_info');
+        }
+
+        // Math operation function
+        function sendSum() {
+            if (!socket || !socket.connected) return;
+
+            const a = parseFloat(numberA.value) || 0;
+            const b = parseFloat(numberB.value) || 0;
+
+            addMessage(`Calculating sum: ${a} + ${b}`, 'sent');
+            socket.emit('sum', { a, b });
+        }
+
+        // Custom event function
+        function sendCustomEvent() {
+            const event = customEvent.value.trim();
+            const data = customData.value.trim();
+            
+            if (!event || !socket || !socket.connected) return;
+
+            let parsedData;
+            try {
+                parsedData = data ? JSON.parse(data) : {};
+            } catch (e) {
+                addMessage(`Invalid JSON data: ${e.message}`, 'error');
+                return;
             }
+
+            addMessage(`Sending custom event "${event}": ${JSON.stringify(parsedData)}`, 'sent');
+            socket.emit(event, parsedData);
+        }
+
+        function clearMessages() {
+            messagesEl.innerHTML = '';
+            addMessage('Message log cleared', 'system');
+        }
+
+        // Keyboard shortcuts
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        roomInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') joinRoom();
+        });
+
+        customData.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendCustomEvent();
+        });
+
+        numberA.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendSum();
+        });
+
+        numberB.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendSum();
         });
 
         // Initial status
         updateStatus(false);
-        addMessage('WebSocket test page loaded. Click "Connect" to start.', 'system');
+        addMessage('WebSocket Modular Event Test loaded. Click "Connect" to start testing all event handlers!', 'system');
     </script>
 </body>
 </html>
